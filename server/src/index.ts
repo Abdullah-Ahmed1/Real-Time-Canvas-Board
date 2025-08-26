@@ -18,7 +18,6 @@ let rectangles: Rect[] = [];
 io.on("connection", (socket) => {
   console.log("client connected", socket.id);
 
-  // Send existing rectangles on connection
   socket.emit("init", rectangles);
 
   socket.on("rectangle:add", (rect: Rect) => {
@@ -29,6 +28,11 @@ io.on("connection", (socket) => {
   socket.on("rectangle:move", (updated: Rect) => {
     rectangles = rectangles.map(r => r.id === updated.id ? updated : r);
     socket.broadcast.emit("rectangle:moved", updated);
+  });
+
+  socket.on("rectangle:delete", (id: string) => {
+    rectangles = rectangles.filter(r => r.id !== id);
+    io.emit("rectangle:deleted", id); 
   });
 
   socket.on("disconnect", () => {
